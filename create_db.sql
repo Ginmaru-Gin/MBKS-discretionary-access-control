@@ -1,0 +1,48 @@
+CREATE TABLE IF NOT EXISTS subjects
+(
+    id INTEGER PRIMARY KEY AUTOINCREMENT
+);
+
+CREATE TABLE IF NOT EXISTS users
+(
+    id       INTEGER PRIMARY KEY,
+    name     TEXT NOT NULL UNIQUE CHECK (LENGTH(name) <= 20),
+    password TEXT NOT NULL CHECK (LENGTH(password) <= 20),
+    home_dir TEXT NOT NULL UNIQUE,
+    FOREIGN KEY (id) REFERENCES subjects (id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS groups
+(
+    id   INTEGER PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE CHECK (LENGTH(name) <= 20),
+    FOREIGN KEY (id) REFERENCES subjects (id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS files
+(
+    id   INTEGER PRIMARY KEY,
+    path TEXT NOT NULL,
+    name TEXT NOT NULL,
+    UNIQUE (path, name)
+);
+CREATE INDEX IF NOT EXISTS file_idx ON files (path, name);
+
+CREATE TABLE IF NOT EXISTS user_has_group
+(
+    user_id  INTEGER NOT NULL,
+    group_id INTEGER NOT NULL,
+    UNIQUE (user_id, group_id),
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (group_id) REFERENCES groups (id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS subject_has_file
+(
+    subject_id INTEGER NOT NULL,
+    file_id    INTEGER NOT NULL,
+    rights     INTEGER NOT NULL DEFAULT 0,
+    UNIQUE (subject_id, file_id),
+    FOREIGN KEY (subject_id) REFERENCES subjects (id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (file_id) REFERENCES files (id) ON DELETE CASCADE ON UPDATE CASCADE
+);
